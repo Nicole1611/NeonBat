@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEON BAT | Disparo 3D</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="page-grid"></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-icon">⌖</span><div><h1>NEON <span>BAT</span></h1><p>SIMULADOR DE COMBATE 3D</p></div></div>
+    <div class="mission"><span class="live-dot"></span> MISIÓN 01 <span class="separator">/</span> CAZA AL OBJETIVO</div>
+    <button id="soundButton" class="icon-button" aria-pressed="true" title="Activar o desactivar sonido">♫ <span id="soundLabel">SONIDO ON</span></button>
+  </header>
+
+  <main class="game-layout">
+    <aside class="left-panel">
+      <section class="panel stats-panel">
+        <div class="panel-title"><span class="tiny-icon">✦</span> PUNTUACIÓN</div>
+        <div class="big-number" id="score">0</div>
+        <div class="stat-divider"></div>
+        <div class="mini-stat"><span>ACIERTOS</span><strong id="hits">0</strong></div>
+        <div class="mini-stat"><span>DISPAROS</span><strong id="shots">0</strong></div>
+        <div class="mini-stat"><span>PRECISIÓN</span><strong id="precision">0%</strong></div>
+      </section>
+
+      <section class="panel difficulty-panel">
+        <div class="panel-title"><span class="tiny-icon purple">▥</span> DIFICULTAD</div>
+        <label class="difficulty-option"><input type="radio" name="difficulty" value="easy"><span>FÁCIL</span><small>Movimiento lento</small></label>
+        <label class="difficulty-option selected"><input type="radio" name="difficulty" value="medium" checked><span>MEDIO</span><small>Ritmo equilibrado</small></label>
+        <label class="difficulty-option"><input type="radio" name="difficulty" value="hard"><span>DIFÍCIL</span><small>Movimiento rápido</small></label>
+      </section>
+      <div class="level-chip"><span>⌃</span> NIVEL <strong id="level">1</strong></div>
+    </aside>
+
+    <section class="center-column">
+      <div class="arena-heading">
+        <div><span class="eyebrow">ZONA DE COMBATE</span><h2>OBJETIVO <span>HOSTIL</span></h2></div>
+        <div class="target-status"><span class="live-dot"></span> OBJETIVO ACTIVO</div>
+      </div>
+      <div class="arena" id="viewerBox">
+        <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+        <div class="arena-grid"></div>
+        <div class="scan-line"></div>
+        <div class="target-ring ring-one"></div><div class="target-ring ring-two"></div>
+        <model-viewer id="eyeModel" src="Objeto/bat_dark_bad_cartoon_monster.glb"
+          camera-controls auto-rotate autoplay interaction-prompt="none"
+          shadow-intensity="1" exposure="1" alt="Murciélago monstruo 3D"></model-viewer>
+        <div class="target-overlay" id="targetOverlay" aria-label="Haz clic para disparar"></div>
+        <div class="arena-hint" id="arenaHint">HAZ CLIC SOBRE EL OBJETIVO PARA DISPARAR</div>
+        <div class="crosshair" id="crosshair">+</div>
+        <div class="arena-bottom-label"><span>SYS://TARGET_TRACKING</span><span id="arenaState">TRACKING ACTIVO</span></div>
+      </div>
+
+      <div class="controls">
+        <button id="shootButton" class="shoot-button"><span class="shoot-icon">⌖</span><span>DISPARAR<small>CLICK / BOTÓN</small></span></button>
+        <button id="resetButton" class="reset-button"><span class="reset-icon">↻</span><span>REINICIAR<small>NUEVA PARTIDA</small></span></button>
+      </div>
+      <div class="bottom-tip"><span class="tip-symbol">ⓘ</span> Apunta al murciélago. Los impactos en el centro otorgan puntos extra.</div>
+    </section>
+
+    <aside class="right-panel">
+      <section class="panel timer-panel">
+        <div class="panel-title"><span class="tiny-icon">◷</span> TIEMPO RESTANTE</div>
+        <div class="timer-wrap"><div class="timer-circle">◷</div><div class="timer-value" id="timer">60<span>s</span></div></div>
+        <div class="timer-track"><div id="timerBar"></div></div>
+      </section>
+      <section class="panel precision-panel">
+        <div class="panel-title"><span class="tiny-icon purple">◎</span> PRECISIÓN</div>
+        <div class="precision-number" id="precisionBig">0<span>%</span></div>
+        <div class="precision-track"><div id="precisionBar"></div></div>
+        <p>EFECTIVIDAD DE DISPARO</p>
+      </section>
+      <section class="panel health-panel">
+        <div class="health-heading"><span class="heart">♡</span><div><span class="panel-title">VIDA DEL OBJETIVO</span><strong id="healthText">100 / 100</strong></div></div>
+        <div class="health-track"><div id="healthBar"></div></div>
+      </section>
+      <section class="panel level-panel">
+        <div class="panel-title"><span class="tiny-icon purple">⚡</span> PROGRESO</div>
+        <div class="level-progress"><div id="levelBar"></div></div>
+        <p id="levelText">Derrota al objetivo para avanzar.</p>
+      </section>
+    </aside>
+  </main>
+
+  <div class="modal hidden" id="resultsModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="results-card">
+      <div class="result-symbol" id="resultSymbol">✦</div>
+      <p class="eyebrow">REPORTE DE MISIÓN</p>
+      <h2 id="resultTitle">MISIÓN COMPLETADA</h2>
+      <p id="resultMessage">Este es el resumen de tu partida.</p>
+      <div class="result-stats">
+        <div><span>PUNTUACIÓN</span><strong id="finalScore">0</strong></div>
+        <div><span>ACIERTOS</span><strong id="finalHits">0</strong></div>
+        <div><span>PRECISIÓN</span><strong id="finalPrecision">0%</strong></div>
+      </div>
+      <button id="playAgainButton" class="shoot-button result-button">↻ JUGAR DE NUEVO</button>
+    </div>
+  </div>
+  <footer>NEON HUNT <span>•</span> ENTRENAMIENTO DE PUNTERÍA 3D</footer>
+</body>
+</html>
